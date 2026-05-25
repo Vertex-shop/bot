@@ -1,3 +1,6 @@
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { createWelcomeEmbed } = require('../utils/embedsExtended');
+
 module.exports = {
   name: 'guildMemberAdd',
 
@@ -9,20 +12,28 @@ module.exports = {
     if (welcomeChannelId) {
       const channel = member.guild.channels.cache.get(welcomeChannelId);
       if (channel && channel.isTextBased()) {
-        const embedUtils = require('../utils/embeds');
-        const embed = embedUtils.createWelcomeEmbed(member, member.guild.name);
-        await channel.send({ embeds: [embed] });
+        const embed = createWelcomeEmbed();
+        
+        const row = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId('ticket_soporte')
+            .setLabel('Abrir Ticket')
+            .setStyle(ButtonStyle.Success)
+            .setEmoji('🆘')
+        );
+
+        await channel.send({ 
+          content: `¡Bienvenido ${member.user}!`,
+          embeds: [embed],
+          components: [row]
+        });
       }
     }
 
     // Enviar DM de bienvenida
     try {
-      const embedUtils = require('../utils/embeds');
-      const dmEmbed = embedUtils.createSuccessEmbed(
-        `¡Bienvenido a ${member.guild.name}!`,
-        'Nos alegra que te unas a nuestra comunidad. Esperamos que disfrutes tu estadía.'
-      );
-      await member.send({ embeds: [dmEmbed] });
+      const embed = createWelcomeEmbed();
+      await member.send({ embeds: [embed] });
     } catch (error) {
       logger.warn(`No se pudo enviar DM a ${member.user.tag}`);
     }

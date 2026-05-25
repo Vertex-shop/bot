@@ -16,6 +16,7 @@ const client = new Client({
 const logger = new Logger(client);
 client.logger = logger;
 client.commands = new Collection();
+client.slashCommands = new Collection();
 
 // Cargar comandos
 const commandsPath = path.join(__dirname, 'src', 'commands');
@@ -27,6 +28,7 @@ for (const file of commandFiles) {
   
   if (command.data && command.execute) {
     client.commands.set(command.data.name, command);
+    client.slashCommands.set(command.data.name, command);
     logger.info(`✅ Comando cargado: ${command.data.name}`);
   }
 }
