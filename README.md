@@ -1,2 +1,0 @@
-# bot
-bot all shop
