@@ -2,6 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('disc
 const db = require('../database/database');
 const { parseTime, formatDuration } = require('../utils/timeUtils');
 const { createJailEmbed } = require('../utils/embedsExtended');
+const { logJailAction } = require('../utils/logging');
 
 const JAIL_ROLE_ID = '1369005158931103784';
 const JAIL_CHANNEL_ID = '1369005579590172854';
@@ -58,6 +59,13 @@ module.exports = {
         // Guardar en base de datos
         db.jailUser(user.id, durationStr, reason, interaction.user.id);
 
+        // Enviar log de acción
+        await logJailAction(interaction.guild, 'jail', user, {
+          duration: durationStr,
+          reason,
+          by: interaction.user.id
+        });
+
         // Enviar embed en el canal de cárcel
         const jailChannel = await interaction.guild.channels.fetch(JAIL_CHANNEL_ID).catch(() => null);
         if (jailChannel) {
@@ -81,6 +89,11 @@ module.exports = {
               await member.roles.set(previousRoles);
             }
             db.unjailUser(user.id);
+
+            // Enviar log de liberación automática
+            await logJailAction(interaction.guild, 'release_auto', user, {
+              reason: reason
+            });
 
             if (jailChannel) {
               const releaseEmbed = new EmbedBuilder()
@@ -111,6 +124,13 @@ module.exports = {
         
         // Eliminar de la base de datos
         db.unjailUser(user.id);
+
+        // Enviar log de acción
+        await logJailAction(interaction.guild, 'release_manual', user, {
+          reason: jailData.reason,
+          by: interaction.user.id,
+          release_reason: 'Liberación manual por staff'
+        });
 
         // Enviar notificación en canal de cárcel
         const jailChannel = await interaction.guild.channels.fetch(JAIL_CHANNEL_ID).catch(() => null);

@@ -1,6 +1,7 @@
 const { Events, ChannelType, EmbedBuilder, PermissionOverwrites } = require('discord.js');
 const db = require('../database/database');
 const { createTicketEmbed, createTicketButtons } = require('../utils/ticketUtils');
+const { logJailAction } = require('../utils/logging');
 
 const TICKET_CATEGORY = '1333325006100238378';
 const TICKET_ROLE = '1339117204410601624';
@@ -102,6 +103,12 @@ module.exports = {
             ticketMsg.edit({ content: '' }).catch(() => {});
           }, 2000);
 
+          // Enviar log
+          await logJailAction(interaction.guild, 'ticket_created', interaction.user, {
+            type: type,
+            channel: ticketChannel.name
+          });
+
           await interaction.reply({ 
             content: `✅ Ticket creado: ${ticketChannel}`, 
             ephemeral: true 
@@ -149,6 +156,11 @@ module.exports = {
           profile.ticketsHandled = (profile.ticketsHandled || 0) + 1;
           db.updateProfile(interaction.user.id, profile);
 
+          // Enviar log
+          await logJailAction(interaction.guild, 'ticket_claimed', interaction.user, {
+            channel: interaction.channel.name
+          });
+
           const embed = new EmbedBuilder()
             .setColor('#00FF00')
             .setDescription(`✅ Ticket reclamado por ${interaction.user.tag}`);
@@ -192,6 +204,11 @@ module.exports = {
             .setTimestamp();
 
           await interaction.reply({ embeds: [embed] });
+
+          // Enviar log
+          await logJailAction(interaction.guild, 'ticket_closed', interaction.user, {
+            channel: interaction.channel.name
+          });
 
           // Eliminar canal después de 5 segundos
           setTimeout(() => {
