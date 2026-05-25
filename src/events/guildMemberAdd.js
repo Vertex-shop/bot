@@ -7,35 +7,31 @@ module.exports = {
   async execute(member, logger) {
     logger.info(`${member.user.tag} se unió al servidor ${member.guild.name}`);
 
-    // Enviar embed de bienvenida
+    // Enviar embed de bienvenida en el canal
     const welcomeChannelId = process.env.WELCOME_CHANNEL_ID;
     if (welcomeChannelId) {
-      const channel = member.guild.channels.cache.get(welcomeChannelId);
-      if (channel && channel.isTextBased()) {
-        const embed = createWelcomeEmbed();
-        
-        const row = new ActionRowBuilder().addComponents(
-          new ButtonBuilder()
-            .setCustomId('ticket_soporte')
-            .setLabel('Abrir Ticket')
-            .setStyle(ButtonStyle.Success)
-            .setEmoji('🆘')
-        );
+      try {
+        const channel = member.guild.channels.cache.get(welcomeChannelId);
+        if (channel && channel.isTextBased()) {
+          const embed = createWelcomeEmbed();
+          
+          const row = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+              .setCustomId('ticket_soporte')
+              .setLabel('Abrir Ticket')
+              .setStyle(ButtonStyle.Success)
+              .setEmoji('🆘')
+          );
 
-        await channel.send({ 
-          content: `¡Bienvenido ${member.user}!`,
-          embeds: [embed],
-          components: [row]
-        });
+          await channel.send({ 
+            content: `¡Bienvenido ${member.user}!`,
+            embeds: [embed],
+            components: [row]
+          });
+        }
+      } catch (error) {
+        logger.error(`Error enviando mensaje de bienvenida a ${member.user.tag}:`, error);
       }
-    }
-
-    // Enviar DM de bienvenida
-    try {
-      const embed = createWelcomeEmbed();
-      await member.send({ embeds: [embed] });
-    } catch (error) {
-      logger.warn(`No se pudo enviar DM a ${member.user.tag}`);
     }
   }
 };

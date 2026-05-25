@@ -99,19 +99,21 @@ module.exports = {
 
           // Borrar ping después de 2 segundos
           setTimeout(() => {
-            ticketMsg.edit({ content: '' });
+            ticketMsg.edit({ content: '' }).catch(() => {});
           }, 2000);
 
           await interaction.reply({ 
             content: `✅ Ticket creado: ${ticketChannel}`, 
             ephemeral: true 
           });
+          return;
         } catch (error) {
           logger.error('Error creando ticket:', error);
           await interaction.reply({ 
             content: '❌ Error al crear el ticket', 
             ephemeral: true 
           });
+          return;
         }
       }
 
@@ -152,12 +154,14 @@ module.exports = {
             .setDescription(`✅ Ticket reclamado por ${interaction.user.tag}`);
 
           await interaction.reply({ embeds: [embed] });
+          return;
         } catch (error) {
           logger.error('Error reclamando ticket:', error);
           await interaction.reply({ 
             content: '❌ Error al reclamar el ticket', 
             ephemeral: true 
           });
+          return;
         }
       }
 
@@ -193,12 +197,14 @@ module.exports = {
           setTimeout(() => {
             interaction.channel.delete().catch(() => {});
           }, 5000);
+          return;
         } catch (error) {
           logger.error('Error cerrando ticket:', error);
           await interaction.reply({ 
             content: '❌ Error al cerrar el ticket', 
             ephemeral: true 
           });
+          return;
         }
       }
     }
