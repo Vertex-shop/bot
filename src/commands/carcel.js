@@ -79,6 +79,26 @@ module.exports = {
           }, 2000);
         }
 
+        // Enviar DM al usuario
+        try {
+          const dmEmbed = new EmbedBuilder()
+            .setColor('#FF0000')
+            .setTitle('🔒 HAS SIDO ENVIADO A LA CÁRCEL')
+            .setDescription(`Fuiste enviado a la cárcel de **${interaction.guild.name}**`)
+            .addFields(
+              { name: '⏰ Duración', value: durationStr, inline: true },
+              { name: '👨‍⚖️ Enviado por', value: interaction.user.tag, inline: true },
+              { name: '📋 Motivo', value: reason }
+            )
+            .setThumbnail(user.avatarURL() || '')
+            .setFooter({ text: 'Sistema de Seguridad Vertex' })
+            .setTimestamp();
+          
+          await user.send({ embeds: [dmEmbed] });
+        } catch (error) {
+          console.error(`No se pudo enviar DM a ${user.tag}:`, error);
+        }
+
         await interaction.reply({ content: `✅ ${user.tag} ha sido encarcelado por ${durationStr}` });
 
         // Liberar después del tiempo especificado
